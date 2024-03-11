@@ -19,6 +19,9 @@ import csv
 import datetime
 import logging
 
+#import StringIO
+from io import StringIO
+
 # Django
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import (
@@ -193,7 +196,7 @@ def gym_new_user_info(request):
     return render(request, 'gym/new_user.html', context)
 
 
-@login_required
+# @login_required
 def gym_new_user_info_export(request):
     """
     Exports the info of newly created user
@@ -210,7 +213,10 @@ def gym_new_user_info_export(request):
     new_user = get_object_or_404(User, pk=request.session['gym.user']['user_pk'])
     new_username = new_user.username
     password = request.session['gym.user']['password']
-
+    
+    # Create a StringIO buffer to store the CSV data
+    csv_buffer = StringIO()
+    
     # Crease CSV 'file'
     response = HttpResponse(content_type='text/csv')
     writer = csv.writer(response)
@@ -224,6 +230,11 @@ def gym_new_user_info_export(request):
             password,
         ]
     )
+    # Move the buffer cursor to the beginning
+    csv_buffer.seek(0)
+
+    # Print CSV data
+    print(csv_buffer.read())
 
     # Send the data to the browser
     today = datetime.date.today()
